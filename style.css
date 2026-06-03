@@ -4,8 +4,8 @@
 
 :root {
     --bg-dark: #070b14;
-    --bg-card: rgba(17, 25, 40, 0.7);
-    --bg-card-hover: rgba(25, 37, 58, 0.9);
+    --bg-card: rgba(17, 25, 40, 0.8);
+    --bg-card-hover: rgba(17, 25, 40, 0.95);
     --primary: #5eead4;
     --primary-dark: #14b8a6;
     --secondary: #60a5fa;
@@ -56,7 +56,7 @@ button {
 }
 
 .section {
-    padding: 110px 0;
+    padding: 100px 0;
     position: relative;
 }
 
@@ -69,35 +69,6 @@ button {
 }
 
 /* =========================
-   BACKGROUND EFFECTS
-========================= */
-
-.background-glow {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.18;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.glow-one {
-    width: 480px;
-    height: 480px;
-    top: -140px;
-    left: -160px;
-    background: var(--primary);
-}
-
-.glow-two {
-    width: 520px;
-    height: 520px;
-    right: -180px;
-    bottom: -180px;
-    background: var(--secondary);
-}
-
-/* =========================
    HEADER
 ========================= */
 
@@ -107,7 +78,7 @@ button {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(7, 11, 20, 0.78);
+    background: rgba(7, 11, 20, 0.85);
     border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     backdrop-filter: blur(18px);
 }
@@ -177,14 +148,14 @@ button {
 }
 
 /* =========================
-   HERO SECTION
+   HERO
 ========================= */
 
 .hero {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding-top: 150px;
+    padding-top: 130px;
 }
 
 .hero-grid {
@@ -219,15 +190,8 @@ button {
 }
 
 @keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    50% {
-        transform: scale(1.15);
-        opacity: 0.7;
-    }
+    0%,100% {transform: scale(1);opacity:1;}
+    50% {transform: scale(1.15);opacity:0.7;}
 }
 
 .eyebrow {
@@ -279,259 +243,35 @@ button {
     transition: var(--transition);
 }
 
-.btn svg {
-    width: 18px;
-    height: 18px;
-}
+.btn svg {width:18px;height:18px;}
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #04201d;
-    box-shadow: 0 12px 26px rgba(20, 184, 166, 0.22);
-}
+.btn-primary {background: linear-gradient(135deg, var(--primary), var(--primary-dark));color:#04201d;box-shadow:0 12px 26px rgba(20, 184, 166,0.22);}
+.btn-primary:hover {transform:translateY(-4px);box-shadow:0 18px 32px rgba(20,184,166,0.3);}
 
-.btn-primary:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 32px rgba(20, 184, 166, 0.3);
-}
-
-.btn-secondary {
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, 0.55);
-    color: var(--text-main);
-}
-
-.btn-secondary:hover {
-    transform: translateY(-4px);
-    border-color: rgba(94, 234, 212, 0.5);
-    color: var(--primary);
-}
-
-.hero-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 33px;
-    margin-top: 42px;
-}
-
-.hero-stats div {
-    display: flex;
-    flex-direction: column;
-}
-
-.hero-stats strong {
-    font-family: "Space Grotesk", sans-serif;
-    color: var(--text-main);
-    font-size: 26px;
-}
-
-.hero-stats span {
-    color: var(--text-muted);
-    font-size: 12px;
-}
+.btn-secondary {border:1px solid var(--border);background: rgba(15,23,42,0.55);color:var(--text-main);}
+.btn-secondary:hover {transform:translateY(-4px);border-color: rgba(94,234,212,0.5);color: var(--primary);}
 
 /* =========================
-   PROFILE CARD
+   SEO CARDS
 ========================= */
 
-.hero-visual {
-    position: relative;
-}
+.seo-cards-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin-top:30px;}
 
-.profile-card {
-    max-width: 390px;
-    margin: auto;
-    padding: 17px;
-    background: rgba(15, 23, 42, 0.74);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(18px);
-}
+.seo-card {background: var(--bg-card);border:1px solid rgba(94,234,212,0.15);border-radius:20px;padding:25px 18px;box-shadow:0 14px 40px rgba(0,0,0,0.3);transition: all 0.35s ease;}
+.seo-card:hover {transform:translateY(-8px) scale(1.02);border-color: rgba(94,234,212,0.4);background: var(--bg-card-hover);}
+.seo-card h3 {font-size:19px;margin-bottom:12px;color: var(--primary);}
+.seo-card p {font-size:14px;color:#cbd5e1;line-height:1.5;}
 
-.profile-image-wrapper {
-    border-radius: 19px;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-    background: rgba(148, 163, 184, 0.08);
-}
-
-.profile-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-info {
-    padding: 18px 5px 12px;
-}
-
-.profile-info h3 {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 23px;
-}
-
-.profile-info p {
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.profile-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 0 5px 5px;
-}
-
-.profile-tags span {
-    padding: 7px 10px;
-    background: rgba(94, 234, 212, 0.08);
-    border: 1px solid rgba(94, 234, 212, 0.16);
-    border-radius: 999px;
-    color: var(--primary);
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.floating-card {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 15px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(15, 23, 42, 0.88);
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(14px);
-    animation: float 4s ease-in-out infinite;
-}
-
-.floating-card svg {
-    width: 22px;
-    color: var(--primary);
-}
-
-.floating-card div {
-    display: flex;
-    flex-direction: column;
-}
-
-.floating-card strong {
-    font-size: 13px;
-}
-
-.floating-card span {
-    color: var(--text-muted);
-    font-size: 11px;
-}
-
-.floating-card-one {
-    top: 45px;
-    left: -34px;
-}
-
-.floating-card-two {
-    right: -12px;
-    bottom: 58px;
-    animation-delay: 1.2s;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-11px);
-    }
-}
+/* CTA Buttons for SEO section */
+.cta-buttons-home {display:flex;justify-content:center;gap:18px;margin-top:38px;}
+.animated-btn {padding:14px 25px;border-radius:12px;font-weight:700;text-transform:uppercase;display:inline-flex;align-items:center;justify-content:center;transition: all 0.35s ease;}
+.animated-btn:hover {transform:translateY(-3px) scale(1.05);box-shadow:0 10px 28px rgba(94,234,212,0.25);}
+.btn-primary.animated-btn {background:linear-gradient(135deg,#5eead4,#14b8a6);color:#04111b;}
+.btn-secondary.animated-btn {border:1px solid rgba(94,234,212,0.3);background:rgba(15,23,42,0.7);color:#f8fafc;}
+.btn-secondary.animated-btn:hover {background: rgba(15,23,42,0.85);border-color: rgba(94,234,212,0.5);color: var(--primary);}
 
 /* =========================
-   TRUSTED SECTION
+   RESPONSIVE
 ========================= */
-
-.trusted-section {
-    padding: 30px 0;
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-    background: rgba(15, 23, 42, 0.25);
-}
-
-.trusted-section p {
-    color: var(--text-muted);
-    font-size: 12px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1.6px;
-}
-
-.trusted-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 18px;
-    margin-top: 18px;
-}
-
-.trusted-grid span {
-    text-align: center;
-    color: #cbd5e1;
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* =========================
-   SECTION HEADINGS
-========================= */
-
-.section-heading {
-    max-width: 720px;
-    margin: 0 auto 48px;
-    text-align: center;
-}
-
-.section-heading h2,
-.contact-card h2 {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(34px, 4.5vw, 52px);
-    line-height: 1.12;
-    letter-spacing: -1.3px;
-}
-
-.section-heading p:last-child,
-.contact-card > p {
-    color: var(--text-muted);
-    margin-top: 15px;
-}
-
-/* =========================
-   ABOUT SECTION
-========================= */
-
-.about-grid {
-    display: grid;
-    grid-template-columns: 1fr 0.88fr;
-    gap: 22px;
-}
-
-.about-content,
-.skills-card {
-    padding: 30px;
-}
-
-.about-content h3 {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 26px;
-    margin-bottom: 12px;
-}
-
-.about-content p {
-    color: var(--text-muted);
-    margin-top: 12px;
-}
-
-.about-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap:
+@media(max-width:1000px){.hero-grid{grid-template-columns:1fr;gap:55px;text-align:center;}.hero-buttons{justify-content:center;}}
+@media(max-width:700px){.mobile-menu-btn{display:block;}.nav-links{position:absolute;top:76px;left:0;width:100%;display:none;flex-direction:column;gap:0;padding:14px 4%;background:rgba(7,11,20,0.97);border-bottom:1px solid var(--border);}.nav-links.active{display:flex;}.nav-links a{padding:13px 8px;}}
