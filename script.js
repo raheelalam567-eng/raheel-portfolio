@@ -1,10 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
-  /* =========================
-     LUCIDE ICONS
-  ========================= */
-  if (typeof lucide !== "undefined") {
-    lucide.createIcons();
+  function initIcons() {
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons();
+    }
   }
+
+  initIcons();
 
   /* =========================
      MOBILE MENU
@@ -13,58 +14,70 @@ document.addEventListener("DOMContentLoaded", function () {
   const navLinks = document.getElementById("navLinks");
 
   if (menuBtn && navLinks) {
-    menuBtn.addEventListener("click", function () {
-      navLinks.classList.toggle("active");
-
-      const isOpen = navLinks.classList.contains("active");
-
+    function setMenuState(isOpen) {
+      navLinks.classList.toggle("active", isOpen);
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
       menuBtn.innerHTML = isOpen
-        ? '<i data-lucide="x"></i>'
-        : '<i data-lucide="menu"></i>';
+        ? '<i data-lucide="x" aria-hidden="true"></i>'
+        : '<i data-lucide="menu" aria-hidden="true"></i>';
+      initIcons();
+    }
 
-      if (typeof lucide !== "undefined") {
-        lucide.createIcons();
-      }
+    menuBtn.addEventListener("click", function () {
+      setMenuState(!navLinks.classList.contains("active"));
     });
 
     navLinks.querySelectorAll("a").forEach(function (link) {
       link.addEventListener("click", function () {
-        navLinks.classList.remove("active");
-        menuBtn.innerHTML = '<i data-lucide="menu"></i>';
-
-        if (typeof lucide !== "undefined") {
-          lucide.createIcons();
-        }
+        setMenuState(false);
       });
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && navLinks.classList.contains("active")) {
+        setMenuState(false);
+      }
     });
   }
 
   /* =========================
-     FOOTER YEAR
+     ACTIVE NAV (multi-page)
   ========================= */
-  const currentYear = document.getElementById("currentYear");
+  const currentPage = document.body.dataset.page;
 
-  if (currentYear) {
-    currentYear.textContent = new Date().getFullYear();
+  if (currentPage) {
+    document.querySelectorAll(".nav-links a[data-page]").forEach(function (link) {
+      link.classList.toggle("active", link.dataset.page === currentPage);
+    });
   }
+
+  /* =========================
+     FOOTER YEAR (after footer.js injects markup)
+  ========================= */
+  function setFooterYear() {
+    const yearEl = document.getElementById("currentYear");
+    if (yearEl) {
+      yearEl.textContent = new Date().getFullYear();
+    }
+  }
+
+  setFooterYear();
 
   /* =========================
      HEADER SHADOW ON SCROLL
   ========================= */
   const header = document.querySelector(".header");
 
-  window.addEventListener("scroll", function () {
+  function updateHeader() {
     if (!header) return;
+    header.classList.toggle("header-scrolled", window.scrollY > 20);
+  }
 
-    if (window.scrollY > 20) {
-      header.classList.add("header-scrolled");
-    } else {
-      header.classList.remove("header-scrolled");
-    }
-  });
+  window.addEventListener("scroll", updateHeader, { passive: true });
+  updateHeader();
 
   /* =========================
-     SCROLL REVEAL ANIMATION
+     SCROLL REVEAL
   ========================= */
   const revealElements = document.querySelectorAll(".reveal");
 
@@ -77,60 +90,97 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
     },
-    {
-      threshold: 0.15
-    }
+    { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
   );
 
-  revealElements.forEach(function (element) {
-    revealObserver.observe(element);
+  revealElements.forEach(function (el) {
+    revealObserver.observe(el);
   });
 
   /* =========================
-     CIRCULAR PROGRESS ANIMATION
+     HERO STATS COUNTER
+  ========================= */
+  const statNumbers = document.querySelectorAll(".hero-stats strong[data-count]");
+
+  function animateCounter(el) {
+    const target = Number(el.getAttribute("data-count")) || 0;
+    const suffix = target >= 5 ? "+" : "";
+    const duration = 1400;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(eased * target);
+      el.textContent = value + suffix;
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  const statsObserver = new IntersectionObserver(
+    function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          statNumbers.forEach(animateCounter);
+          observer.disconnect();
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  const heroStats = document.querySelector(".hero-stats");
+  if (heroStats && statNumbers.length) {
+    statsObserver.observe(heroStats);
+  }
+
+  /* =========================
+     SKILL PROGRESS CIRCLES
   ========================= */
   const skillCards = document.querySelectorAll(".skill-card");
 
   const progressObserver = new IntersectionObserver(
     function (entries, observer) {
       entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          const card = entry.target;
-          const percent = Number(card.getAttribute("data-percent")) || 0;
-          const circle = card.querySelector(".progress-circle");
-          const number = circle ? circle.querySelector("span") : null;
+        if (!entry.isIntersecting) return;
 
-          if (!circle || !number) return;
+        const card = entry.target;
+        const percent = Number(card.getAttribute("data-percent")) || 0;
+        const circle = card.querySelector(".progress-circle");
+        const number = circle ? circle.querySelector("span") : null;
 
-          let current = 0;
-          const speed = 18;
+        if (!circle || !number) return;
 
-          const progressTimer = setInterval(function () {
-            if (current >= percent) {
-              clearInterval(progressTimer);
-              current = percent;
-            }
+        let current = 0;
+        const speed = 16;
 
-            const degree = current * 3.6;
+        const timer = setInterval(function () {
+          if (current >= percent) {
+            clearInterval(timer);
+            current = percent;
+          }
 
-            circle.style.background =
-              "conic-gradient(#5eead4 0deg, #5eead4 " +
-              degree +
-              "deg, rgba(94, 234, 212, 0.14) " +
-              degree +
-              "deg, rgba(94, 234, 212, 0.14) 360deg)";
+          const degree = current * 3.6;
+          circle.style.background =
+            "conic-gradient(#2dd4bf 0deg, #2dd4bf " +
+            degree +
+            "deg, rgba(45, 212, 191, 0.12) " +
+            degree +
+            "deg, rgba(45, 212, 191, 0.12) 360deg)";
 
-            number.textContent = current + "%";
-            current++;
-          }, speed);
+          number.textContent = current + "%";
+          current++;
+        }, speed);
 
-          observer.unobserve(card);
-        }
+        observer.unobserve(card);
       });
     },
-    {
-      threshold: 0.35
-    }
+    { threshold: 0.3 }
   );
 
   skillCards.forEach(function (card) {
@@ -138,31 +188,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /* =========================
-     CONTACT FORM BASIC ACTION
-     GitHub Pages cannot send form directly.
+     FORMSUBMIT — auto email
   ========================= */
-  const contactForm = document.querySelector(".contact-form");
+  const formNext = document.getElementById("formNext");
 
-  if (contactForm) {
-    contactForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-
-      const name = contactForm.querySelector('input[name="name"]').value.trim();
-      const email = contactForm.querySelector('input[name="email"]').value.trim();
-      const subject = contactForm.querySelector('input[name="subject"]').value.trim();
-      const message = contactForm.querySelector('textarea[name="message"]').value.trim();
-
-      const mailSubject = subject || "SEO Project Inquiry";
-      const mailBody =
-        "Name: " + name + "%0D%0A" +
-        "Email: " + email + "%0D%0A%0D%0A" +
-        "Message:%0D%0A" + message;
-
-      window.location.href =
-        "mailto:raheelalam567@gmail.com?subject=" +
-        encodeURIComponent(mailSubject) +
-        "&body=" +
-        mailBody;
-    });
+  if (formNext) {
+    formNext.value = new URL("thanks.html", window.location.href).href;
   }
+
+  const submitForms = document.querySelectorAll("form[data-formsubmit]");
+
+  submitForms.forEach(function (form) {
+    form.addEventListener("submit", function () {
+      const btn = form.querySelector("#submitBtn") || form.querySelector('[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "Sending…";
+      }
+    });
+  });
 });
