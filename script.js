@@ -62,6 +62,31 @@
     if (output) output.textContent = `${count} project${count === 1 ? '' : 's'}`;
   }));
 
+  // Preview the original credential without creating or altering certificate artwork.
+  const certificateDialog = document.getElementById('certificate-dialog');
+  const certificateImage = document.getElementById('certificate-dialog-image');
+  const certificateTitle = document.getElementById('certificate-dialog-title');
+  let certificateTrigger = null;
+  document.querySelectorAll('[data-certificate]').forEach(trigger => trigger.addEventListener('click', () => {
+    if (!certificateDialog || !certificateImage || !certificateTitle) return;
+    certificateTrigger = trigger;
+    certificateImage.src = trigger.dataset.certificate;
+    certificateImage.alt = trigger.dataset.certificateTitle + ' certificate issued to Raheel Alam';
+    certificateImage.hidden = false;
+    certificateTitle.textContent = trigger.dataset.certificateTitle;
+    if (typeof certificateDialog.showModal === 'function') certificateDialog.showModal();
+  }));
+  document.querySelector('.certificate-close')?.addEventListener('click', () => certificateDialog.close());
+  certificateDialog?.addEventListener('click', e => {
+    const box = certificateDialog.getBoundingClientRect();
+    if (e.target === certificateDialog && (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom)) certificateDialog.close();
+  });
+  certificateDialog?.addEventListener('close', () => {
+    certificateImage.hidden = true;
+    certificateImage.removeAttribute('src');
+    certificateTrigger?.focus();
+  });
+
   const next = document.getElementById('formNext');
   if (next) next.value = new URL('thanks.html', window.location.href).href;
   // Native validation runs before submit. Keep the submit control usable if a request fails.
@@ -92,6 +117,21 @@
   reduceMotion.addEventListener('change', e => { paused = e.matches || savedPause; syncMotion(); motionControllers.forEach(c => c.wake()); });
   syncMotion();
 
+  const rotatingRole = document.querySelector('[data-rotating-role]');
+  const roleNames = ['SEO Strategist', 'WordPress Developer', 'Meta Ads Specialist'];
+  let roleIndex = 0;
+  if (rotatingRole) {
+    setInterval(() => {
+      if (paused || reduceMotion.matches || document.hidden || rotatingRole.getBoundingClientRect().bottom < 0) return;
+      rotatingRole.classList.add('role-out');
+      setTimeout(() => {
+        roleIndex = (roleIndex + 1) % roleNames.length;
+        rotatingRole.textContent = roleNames[roleIndex];
+        rotatingRole.classList.remove('role-out');
+      }, 180);
+    }, 3400);
+  }
+
   // A small, responsive particle field. Stop work while offscreen, hidden, or paused.
   const motionControllers = [];
   document.querySelectorAll('.particle-canvas').forEach(canvas => {
@@ -113,18 +153,16 @@
       context.clearRect(0, 0, width, height);
       points.forEach((p, i) => {
         if (move) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > width) p.vx *= -1; if (p.y < 0 || p.y > height) p.vy *= -1; }
-        context.beginPath(); context.arc(p.x, p.y, p.r, 0, Math.PI * 2); context.fillStyle = i % 5 === 0 ? 'rgba(204,103,75,.33)' : 'rgba(22,60,54,.22)'; context.fill();
+        context.beginPath(); context.arc(p.x, p.y, p.r, 0, Math.PI * 2); context.fillStyle = i % 5 === 0 ? 'rgba(220,60,117,.33)' : 'rgba(64,42,103,.22)'; context.fill();
         for (let j = i + 1; j < points.length; j++) {
           const q = points[j], distance = Math.hypot(p.x - q.x, p.y - q.y);
-          if (distance < 145) { context.beginPath(); context.moveTo(p.x, p.y); context.lineTo(q.x, q.y); context.strokeStyle = `rgba(22,60,54,${(1 - distance / 145) * .09})`; context.lineWidth = .7; context.stroke(); }
+          if (distance < 145) { context.beginPath(); context.moveTo(p.x, p.y); context.lineTo(q.x, q.y); context.strokeStyle = `rgba(64,42,103,${(1 - distance / 145) * .09})`; context.lineWidth = .7; context.stroke(); }
         }
         if (Math.hypot(p.x - pointer.x, p.y - pointer.y) < 130 && move) {
-          context.beginPath(); context.moveTo(p.x, p.y); context.lineTo(pointer.x, pointer.y); context.strokeStyle = 'rgba(204,103,75,.15)'; context.stroke();
+          context.beginPath(); context.moveTo(p.x, p.y); context.lineTo(pointer.x, pointer.y); context.strokeStyle = 'rgba(220,60,117,.15)'; context.stroke();
         }
       });
-      // Slow orbital geometry makes the field intentional rather than visual noise.
-      context.save(); context.translate(width * .76, height * .5); context.rotate(move ? performance.now() / 90000 : .3);
-      context.beginPath(); context.ellipse(0, 0, Math.min(width * .28, 300), Math.min(height * .3, 200), -.5, 0, Math.PI * 2); context.strokeStyle = 'rgba(22,60,54,.055)'; context.lineWidth = 1; context.stroke(); context.restore();
+
     }
     function tick(now) {
       frame = null;
