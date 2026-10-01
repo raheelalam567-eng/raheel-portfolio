@@ -16,7 +16,29 @@
   }
 })();
 
+/* Keep secondary static pages consistent when viewed through GitHub Pages. */
+(function ensureSeoUrl() {
+  var siteRoot = "https://raheelalam567-eng.github.io/raheel-portfolio/";
+  var filename = window.location.pathname.split("/").pop() || "";
+  var canonicalUrl = filename && filename !== "index.html" ? siteRoot + filename : siteRoot;
+
+  if (!document.querySelector('link[rel="canonical"]')) {
+    var canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = canonicalUrl;
+    document.head.appendChild(canonical);
+  }
+
+  if (!document.querySelector('meta[property="og:url"]')) {
+    var ogUrl = document.createElement("meta");
+    ogUrl.setAttribute("property", "og:url");
+    ogUrl.content = canonicalUrl;
+    document.head.appendChild(ogUrl);
+  }
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   
   /* =========================
      ICONS INITIALIZATION
@@ -27,6 +49,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   initIcons();
+
+  /* A few legacy pages contained the same fixed WhatsApp link twice. */
+  document.querySelectorAll(".whatsapp-float").forEach(function (link, index) {
+    if (index > 0) link.remove();
+  });
 
   /* =========================
      MOBILE MENU
@@ -111,111 +138,38 @@ document.addEventListener("DOMContentLoaded", function () {
   }, { passive: true });
 
   /* =========================
-     DYNAMIC CURSOR GLOW ACCENT
-  ========================= */
-  if (window.matchMedia("(pointer: fine)").matches) {
-    const glow = document.createElement("div");
-    glow.className = "bg-glow";
-    glow.style.position = "fixed";
-    glow.style.top = "0";
-    glow.style.left = "0";
-    glow.style.willChange = "transform";
-    document.body.appendChild(glow);
-
-    document.addEventListener("mousemove", function (e) {
-      requestAnimationFrame(function () {
-        glow.style.transform = `translate3d(${e.clientX - 200}px, ${e.clientY - 200}px, 0)`;
-      });
-    }, { passive: true });
-  }
-
-  /* =========================
-     MAGNETIC HOVER ANIMATIONS
-  ========================= */
-  const magneticEls = document.querySelectorAll(".btn, .btn-magnetic, .logo-icon");
-  magneticEls.forEach(function (el) {
-    el.addEventListener("mousemove", function (e) {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px) scale(1.03)`;
-    });
-    el.addEventListener("mouseleave", function () {
-      el.style.transform = "translate(0px, 0px) scale(1)";
-    });
-  });
-
-  /* =========================
-     MODERN HERO PARALLAX MOTION
-  ========================= */
-  function initHeroMotion() {
-    const hero = document.querySelector(".hero");
-    if (!hero || !window.matchMedia("(prefers-reduced-motion: no-preference)").matches) return;
-
-    const motionLayer = document.createElement("div");
-    motionLayer.className = "hero-motion-layer";
-    motionLayer.innerHTML = `
-      <span class="hero-motion-shape shape-1"></span>
-      <span class="hero-motion-shape shape-2"></span>
-      <span class="hero-motion-shape shape-3"></span>
-      <span class="hero-motion-shape shape-4"></span>
-    `;
-    hero.appendChild(motionLayer);
-
-    let moveX = 0;
-    let moveY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    hero.addEventListener("mousemove", function (e) {
-      const rect = hero.getBoundingClientRect();
-      targetX = (e.clientX - rect.left) / rect.width - 0.5;
-      targetY = (e.clientY - rect.top) / rect.height - 0.5;
-    });
-
-    function animateMotion() {
-      moveX += (targetX - moveX) * 0.08;
-      moveY += (targetY - moveY) * 0.08;
-      motionLayer.style.setProperty("--hero-move-x", `${moveX * 22}px`);
-      motionLayer.style.setProperty("--hero-move-y", `${moveY * 22}px`);
-      requestAnimationFrame(animateMotion);
-    }
-
-    requestAnimationFrame(animateMotion);
-  }
-  initHeroMotion();
-
-  /* =========================
      STAGGERED SCROLL REVEAL
   ========================= */
   const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
 
-  const revealObserver = new IntersectionObserver(
-    function (entries, observer) {
-      const intersecting = entries.filter(e => e.isIntersecting);
-      if (intersecting.length > 0) {
-        // Sort elements based on their vertical page position to reveal top-to-bottom
-        intersecting.sort(function (a, b) {
-          return a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top;
-        });
+  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    revealElements.forEach(function (el) { el.classList.add("active"); });
+  } else {
+    const revealObserver = new IntersectionObserver(
+      function (entries, observer) {
+        const intersecting = entries.filter(e => e.isIntersecting);
+        if (intersecting.length > 0) {
+          intersecting.sort(function (a, b) {
+            return a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top;
+          });
 
-        intersecting.forEach(function (entry, index) {
-          const el = entry.target;
-          // Apply dynamic stagger delay for items triggered in the same frame
-          const delay = index * 80; 
-          setTimeout(function () {
-            el.classList.add("active");
-          }, delay);
-          observer.unobserve(el);
-        });
-      }
-    },
-    { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-  );
+          intersecting.forEach(function (entry, index) {
+            const el = entry.target;
+            const delay = index * 70;
+            setTimeout(function () {
+              el.classList.add("active");
+            }, delay);
+            observer.unobserve(el);
+          });
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
 
-  revealElements.forEach(function (el) {
-    revealObserver.observe(el);
-  });
+    revealElements.forEach(function (el) {
+      revealObserver.observe(el);
+    });
+  }
 
   /* =========================
      STATS COUNTER ANIMATION
@@ -226,6 +180,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const target = Number(el.getAttribute("data-count")) || 0;
     const isTechi = el.textContent.includes("M");
     const suffix = isTechi ? "M+" : (target >= 5 ? "+" : "");
+    if (prefersReducedMotion) {
+      el.textContent = target + suffix;
+      return;
+    }
     const duration = 1600;
     const start = performance.now();
 
@@ -279,6 +237,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!circle || !number) return;
 
+        if (prefersReducedMotion) {
+          const degree = percent * 3.6;
+          circle.style.background =
+            "conic-gradient(#2dd4bf 0deg, #2dd4bf " +
+            degree +
+            "deg, rgba(45, 212, 191, 0.12) " +
+            degree +
+            "deg, rgba(45, 212, 191, 0.12) 360deg)";
+          number.textContent = percent + "%";
+          observer.unobserve(card);
+          return;
+        }
+
         let current = 0;
         const speed = 12;
 
@@ -311,71 +282,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /* =========================
-     3D TILT INTERACTIONS
-     Applies a subtle 3D tilt to hero profile and project cards
-  ========================= */
-  (function init3DTilt() {
-    const selectors = ['.profile-card', '.project-card'];
-    const maxTilt = 12; // degrees
-    const elems = document.querySelectorAll(selectors.join(','));
-
-    elems.forEach(function (el) {
-      // wrap with perspective container if not already
-      if (!el.classList.contains('tilt-3d-wrapper')) el.classList.add('tilt-3d-wrapper');
-
-      // create inner wrapper if missing
-      if (!el.querySelector('.tilt-inner')) {
-        const inner = document.createElement('div');
-        inner.className = 'tilt-inner';
-        while (el.firstChild) inner.appendChild(el.firstChild);
-        el.appendChild(inner);
-      }
-
-      // add shine layer
-      if (!el.querySelector('.tilt-shine')) {
-        const shine = document.createElement('div');
-        shine.className = 'tilt-shine';
-        el.appendChild(shine);
-      }
-
-      const inner = el.querySelector('.tilt-inner');
-      const shine = el.querySelector('.tilt-shine');
-      let rafId = null;
-
-      function handleMove(e) {
-        const rect = el.getBoundingClientRect();
-        const px = (e.clientX - rect.left) / rect.width;
-        const py = (e.clientY - rect.top) / rect.height;
-        const rotY = (px - 0.5) * maxTilt * 2; // left/right
-        const rotX = (0.5 - py) * maxTilt * 2; // up/down
-
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(function () {
-          inner.style.transform = `translateZ(20px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-          if (shine) shine.style.background = `radial-gradient(circle at ${px * 100}% ${py * 100}%, rgba(255,255,255,0.12), transparent 40%)`;
-          el.classList.remove('tilt-idle');
-        });
-      }
-
-      function handleLeave() {
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(function () {
-          inner.style.transform = '';
-          if (shine) shine.style.background = '';
-          el.classList.add('tilt-idle');
-        });
-      }
-
-      el.addEventListener('mousemove', handleMove);
-      el.addEventListener('mouseleave', handleLeave);
-      el.addEventListener('mouseenter', function () { el.classList.remove('tilt-idle'); });
-
-      // set initial idle float
-      el.classList.add('tilt-idle');
-    });
-  })();
-
-  /* =========================
      FORMSUBMIT AUTO NEXT URL
   ========================= */
   const formNext = document.getElementById("formNext");
@@ -387,9 +293,14 @@ document.addEventListener("DOMContentLoaded", function () {
   submitForms.forEach(function (form) {
     form.addEventListener("submit", function () {
       const btn = form.querySelector("#submitBtn") || form.querySelector('[type="submit"]');
+      const status = form.querySelector(".form-status");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = "Sending…";
+        btn.setAttribute("aria-disabled", "true");
+        btn.textContent = "Sending…";
+      }
+      if (status) {
+        status.textContent = "Sending your message securely…";
       }
     });
   });
