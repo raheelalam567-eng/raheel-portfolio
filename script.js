@@ -290,11 +290,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const degree = current * 3.6;
           circle.style.background =
-            "conic-gradient(#2dd4bf 0deg, #2dd4bf " +
+            "conic-gradient(#174e47 0deg, #174e47 " +
             degree +
-            "deg, rgba(45, 212, 191, 0.12) " +
+            "deg, rgba(23, 78, 71, 0.12) " +
             degree +
-            "deg, rgba(45, 212, 191, 0.12) 360deg)";
+            "deg, rgba(23, 78, 71, 0.12) 360deg)";
 
           number.textContent = current + "%";
           current++;
@@ -316,7 +316,8 @@ document.addEventListener("DOMContentLoaded", function () {
   ========================= */
   (function init3DTilt() {
     const selectors = ['.profile-card', '.project-card'];
-    const maxTilt = 12; // degrees
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(pointer: fine)').matches) return;
+    const maxTilt = 3;
     const elems = document.querySelectorAll(selectors.join(','));
 
     elems.forEach(function (el) {
